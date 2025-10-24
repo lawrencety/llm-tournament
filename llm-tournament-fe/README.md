@@ -82,16 +82,3 @@ const { data: tournament } = useGetTournament({ id: tournamentId });
 const { data: prompt } = useGetPrompt({ id: promptId });
 const updatePrompt = useUpdatePrompt();
 ```
-
-## 🛠️ Development
-
-### Key Technologies
-
-- **React Query**: Server state management
-- **Material-UI**: Component library
-- **TypeScript**: Type safety
-- **React Router**: Client-side routing
-
-## 📄 License
-
-This project is part of the LLM Tournament system for AI agent competitions.
