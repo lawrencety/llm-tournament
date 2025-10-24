@@ -6,23 +6,23 @@ import {
   Alert,
   Button,
   Container,
-  Grid,
   Paper,
-  Chip,
   Divider,
-  IconButton
+  Grid
 } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
 import { useGetTournament } from "../../apis/tournament";
 import { useParams } from "react-router";
 import { PromptMatch } from "../../components/Prompt/PromptMatch";
-import { PromptCard } from "../../components/Prompt/PromptCard";
+import {WinningPrompt} from "../../components/Prompt/WinningPrompt";
 
 export const TournamentDetail = () => {
   const { tournamentId } = useParams();
   const navigate = useNavigate();
   const { data: tournament, isLoading, error, refetch } = useGetTournament({ id: Number(tournamentId) });
+
+  const activePrompts = tournament?.prompts ? tournament.prompts.filter(prompt => !prompt.lost) : [];
 
   if (isLoading) {
     return (
@@ -46,7 +46,7 @@ export const TournamentDetail = () => {
           }
           sx={{ borderRadius: 2 }}
         >
-          {error instanceof Error ? error.message : 'Failed to fetch tournament'}
+          {error.message || 'Failed to fetch tournament'}
         </Alert>
       </Container>
     );
@@ -65,11 +65,13 @@ export const TournamentDetail = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Paper sx={{ p: 4, mb: 4 }}>
-        <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-            <IconButton onClick={() => navigate('/tournaments')} color="primary" aria-label="back to tournaments">
-              <ArrowBack />
-            </IconButton>
+        <Grid container direction="column" alignItems="center" spacing={2}>
+          <Grid sx={{ position: 'relative', top: -20, left: '-50%', transform: 'translateX(50%)',  height: 0}}>
+            <Button  onClick={() => navigate('/tournaments')} startIcon={<ArrowBack />}>
+              Back to Tournaments
+            </Button>
+          </Grid>
+          <Grid>
             <Typography
               variant="h3"
               component="h1"
@@ -82,43 +84,36 @@ export const TournamentDetail = () => {
             >
               {tournament.name}
             </Typography>
-            <Box sx={{ width: 48 }} />
-          </Box>
-
-          <Divider sx={{ mb: 3 }} />
-
-          <Typography
-            variant="h6"
-            color="text.primary"
-            sx={{
-              mb: 3,
-              maxWidth: '800px',
-              mx: 'auto',
-              textAlign: 'center',
-              lineHeight: 1.6
-            }}
-          >
-            {tournament.userInput}
-          </Typography>
-        </Box>
+          </Grid>
+          <Grid sx={{ width: '100%', height: 1 }}>
+            <Divider  />
+          </Grid>
+          <Grid>
+            <Typography variant="h6">
+              User Input:
+            </Typography>
+          </Grid>
+          <Grid>
+            <Typography variant="h6">
+              {tournament.userInput}
+            </Typography>
+          </Grid>
+        </Grid>
       </Paper>
 
-      {tournament.prompts && tournament.prompts.length > 1 && (
-        <Box>
-          <Typography
-            variant="h4"
-            component="h2"
-            sx={{
-              textAlign: 'center',
-              mb: 3,
-              color: 'primary.main',
-              fontWeight: 700
-            }}
-          >
-            Choose Your Winner
-          </Typography>
-          <PromptMatch prompts={tournament.prompts} />
-        </Box>
+      {activePrompts.length === 1 && <WinningPrompt prompt={activePrompts[0]} />}
+
+      {activePrompts.length > 1 && (
+        <Grid container spacing={2} direction="column" alignItems="center">
+          <Grid>
+            <Typography variant="h4">
+              Left or Right?
+            </Typography>
+          </Grid>
+          <Grid>
+            <PromptMatch activePrompts={activePrompts} />
+          </Grid>
+        </Grid>
       )}
     </Container>
   );
